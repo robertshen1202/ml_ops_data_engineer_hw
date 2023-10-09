@@ -81,7 +81,7 @@ This data should also be saved in a way that these tables can be accessed by ref
 
 ```
 |----------------------------|---------------|---------------|---------------|----------------|----------------|---------------|-----------|------------|-----------|-----------|-----------|-------|
-| time                       | fx_1          | fx_2          | fy_1          | fy_2           | fz_1           | fz_2          | x_1       | x_2        | y_1       | y_2       | z_1       | z_2   |
+|           time             |     fx_1      |     fx_2      |     fy_1      |     fy_2       |     fz_1       |     fz_2      |    x_1    |    x_2     |    y_1    |    y_2    |    z_1    |  z_2  |
 | -------------------------- | ------------- | ------------- | ------------- | -------------- | -------------- | ------------- | --------- | ---------- | --------- | --------- | --------- | ----- |
 | 2022-11-23T20:40:00.007Z   | 176.0963814   |               | 174.2686233   |                | -258.1794165   |               |           |            |           |           |           |       |
 | -------------------------- | ------------- | ------------- | ------------- | -------------- | -------------- | ------------- | --------- | ---------- | --------- | --------- | --------- | ----- |
@@ -127,6 +127,7 @@ Try to follow ETL best practices for your example code. Good habits that we like
 - Consider a design for your workflow that would make it easy to modify or update data as new features get added. If you put all of the data in one location, how easy would it be to udpate or modify. If you spread your data across multiple locations, how would updates or modifications propagate to all those locations? 
 - Consider processing speed and use parallel processing for independent tasks when possible. Which parts of your pipeline can be parallelized? Which have to be done sequentially?
 - Save data in formats that are easily extensible and convneint to query.
+- Consider how your solution scales. If your implementation doesn't scale well, which parts would need the most/least modifcation? 
 
 ## Conclusion 
 
