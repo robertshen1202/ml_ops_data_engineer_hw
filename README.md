@@ -11,7 +11,7 @@ At Machina Labs we use a pair of robotic arms to form sheet metal into custom ge
 While the robots are running we record large quantities of data in a time-series format tracking the position of the robot arms and the amount of force the arms experience using a sensor called a ``load cell``. An example of this data is given in the file `data/sample.parquet` and is shown below:
 
 ```
-|-------|--------------------------|---------------------|-------|----------|----------------------|-------------|
+|---------|----------------------------|-----------------------|---------|------------|------------------------|---------------|
 |         | time                       | value                 | field   | robot_id   | run_uuid               | sensor_type   |
 | ------- | -------------------------- | --------------------- | ------- | ---------- | ---------------------- | ------------- |
 | 0       | 2022-11-23T20:40:00.444Z   | 826.1516              | x       | 1          | 8910095844186657261    | encoder       |
@@ -21,7 +21,7 @@ While the robots are running we record large quantities of data in a time-series
 | 2       | 2022-11-23T20:40:03.778Z   | 846.7317              | x       | 1          | 8910095844186657261    | encoder       |
 | ------- | -------------------------- | --------------------- | ------- | ---------- | ---------------------- | ------------- |
 
-|-------|--------------------------|---------------------|-------|----------|----------------------|-------------|
+|---------|----------------------------|-----------------------|---------|------------|------------------------|---------------|
 | 8664    | 2022-11-23T20:40:00.444Z   | -1132.949052734375    | fx      | 1          | 7582293080991470061    | load_cell     |
 | ------- | -------------------------- | --------------------- | ------- | ---------- | ---------------------- | ------------- |
 | 8665    | 2022-11-23T20:40:02.111Z   | -906.7292041015623    | fx      | 1          | 7582293080991470061    | load_cell     |
@@ -44,26 +44,28 @@ Note: The encoder gives all values in millimeters and the load cell gives all va
 Design an ETL pipeline for processing the timeseries data given in `data/sample.parquet`. Your pipeline should perform the following steps:
 
 1. Preprocess and Clean
-2. Convert timeseries to features by `robot_id`
+2. Convert the timeseries data into a "wide" format
 3. Include Engineered/Calculated Features
 4. Calculate Runtime Statistics
-5. Store and Provide Access Tools
+5. Store and Provide tools for easily accessing this processed data.
 
 All of these results should be saved in a format that is easy for others to access. It's up to you how you want to store things. You can use simple CSV files, a SQL database, etc. Regardless what you choose, make sure the structure is simple enough that any stakeholder wanting to use your data could easily read it back using the tools and methods you provide. 
 
 ### 2.1 Preprocess and Clean
 
 Your first task in the ETL pipeline should be to extract/read data from `sample.parquet` and pre-process/clean the data (e.g. handling NaN values, expected values, outliers). You should also consider methods for enforcing datatypes, filling missing data, etc so that your pipeline doesn't break. If one of the sensors was missing some data, would your pipeline fail? Does your pipeline assume a certain structure for the data? How does it accomodate changes or mistakes down stream from where your ETL pipeline runs? Use your best judgement given what you understand about the type of data given what cleansing steps make sense.
-### 2.2 Convert timeseries to features by `robot_id`
+### 2.2 Convert timeseries to a wide format
 #### Convert to features
-Timeseries is a convenient format for storing data but it's often not the most useful for interacting with, making plots, training ML models, etc. With your newly processed data, convert the timeseries data into a format that has the encoder values (`x`,`y`,`z`) and forces (`fx`,`fy`,`fz`) for each of the two robots (1,2) as individual columns. So rather than each row showing a time, sensor_type, robot_id, etc the data should show measurements for robots 1 & 2 corresponding to each encoder (e.g. `x_1`, `y_1`, `z_1`, `x_2`, `y_2`, `z_2`) and forces (`fx_1`, `fy_1`, `fz_1`, `fx_2`, `fy_2`, `fz_2`) for every timestamp. 
+Timeseries is a convenient format for storing data but it's often not the most useful for interacting with, making plots, training ML models, etc. With your newly processed data, convert the timeseries data into a wide format that has the encoder values (`x`,`y`,`z`) and forces (`fx`,`fy`,`fz`) for each of the two robots (1,2) as individual columns. So rather than each row showing a time, sensor_type, robot_id, etc the data should show measurements for robots 1 & 2 corresponding to each encoder (e.g. `x_1`, `y_1`, `z_1`, `x_2`, `y_2`, `z_2`) and forces (`fx_1`, `fy_1`, `fz_1`, `fx_2`, `fy_2`, `fz_2`) for every timestamp. 
 
 In the end, the header for your data should look like the following:
 
 ```
-|--------------------------|-------------|-------------|-------------|--------------|--------------|-------------|---------|----------|---------|---------|---------|-----|
-| time | fx_1 | fx_2 | fy_1 | fy_2 | fz_1 | fz_2 | x_1 | x_2 | y_1 | y_2 | z_1 | z_2 |
-| ---- | ---- | ---- | ---- | ---- | ---- | ---- | --- | --- | --- | --- | --- | --- |
+|------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|-------|
+| time |  fx_1  |  fx_2  |  fy_1  |  fy_2  |  fz_1  |  fz_2  |  x_1   |  x_2   |  y_1   |  y_2   |  z_1   |  z_2  |
+|------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|-------|
+| 1234 | 0.1111 | 0.2222 | 0.3333 | 0.4444 | 0.5555 | 0.6666 | 0.7777 | 0.8888 | 0.9999 | 0.1234 | 0.5678 | 0.987 | 
+|------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|-------|
 ```
 
 #### Match timestamps with measurements
@@ -73,12 +75,12 @@ After converting the timeseries data to individual features, you'll notice many 
 3. Robot 2 encoder measurements
 4. Robot 2 load cell measurements
 
-However, we would like to be able to compare each of these features corresponding to a single timestamp. So in this step of the ETL, you should transform the data to guarantee that any timestamp we access has a value for each column. It's up to you how you want to do this. You can match timestamps between features, interpolate values between timestamps or any other method you deem reasonable. Regardless which strategy you choose, explain why you chose it and what benefits or trade-offs it involves.
+However, we would like to be able to compare each of these features corresponding to a single timestamp. So in this step of the ETL, you should transform the data to guarantee that any timestamp we access has a value for each column. Regardless which strategy you choose, explain why you chose it and what benefits or trade-offs it involves.
 
 This data should also be saved in a way that these tables can be accessed by reference to the `run_uuid`. The table below is an example of data for `run_uuid = 6176976534744076781` with the "gaps" in the data you will need to transform. 
 
 ```
-|--------------------------|-------------|-------------|-------------|--------------|--------------|-------------|---------|----------|---------|---------|---------|-----|
+|---------------------------|----------------|---------------|---------------|----------------|----------------|---------------|-----------|------------|-----------|-----------|-----------|-------|
 | time                       | fx_1          | fx_2          | fy_1          | fy_2           | fz_1           | fz_2          | x_1       | x_2        | y_1       | y_2       | z_1       | z_2   |
 | -------------------------- | ------------- | ------------- | ------------- | -------------- | -------------- | ------------- | --------- | ---------- | --------- | --------- | --------- | ----- |
 | 2022-11-23T20:40:00.007Z   | 176.0963814   |               | 174.2686233   |                | -258.1794165   |               |           |            |           |           |           |       |
