@@ -134,15 +134,7 @@ Try to follow ETL best practices for your example code. Good habits that we like
 There is a lot of information contained in this Readme. Most of the suggestions are based on experiences we've had designing our own ETL process. However we are interested in seeing how you approach these problems. So feel free to deviate from these suggestions where you think it's appropriate. Also, we strongly encourage you to include comments and descriptions of your thought process in your final solution. If you would like to submit a readme or document with notes and explanations for your ETL we will gladly take that into account when reviewing your code.
 
 # Submission
-In order to submit the assignment, do the following:
-
-1. Navigate to GitHub's project import page: [https://github.com/new/import](https://github.com/new/import)
-
-2. In the box titled "Your old repository's clone URL", paste the homework repository's link: [https://github.com/Machina-Labs/data_engineer_hw](https://github.com/Machina-Labs/data_engineer_hw)
-
-3. In the box titled "Repository Name", add a name for your local homework (ex. `data_engineer_soln`)
-
-4. Set privacy level to "Public", then click "Begin Import" button at bottom of the page.
+In order to submit the assignment you may either push your code/results to github (or gitlab, bitbucket, etc) and share the link with us or send a zipped folder containing your solution via email. 
 
 5. Develop your homework solution in the cloned repository and push it to Github when you're done. Extra points for good Git hygiene.
 
